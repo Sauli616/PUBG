@@ -6,7 +6,7 @@ EnablePrimaryMouseButtonEvents(true)  -- true = on, false = off
 
 local fire_key         = 1      -- Left mouse button (1)
 local secondary_key    = 3      -- Middle mouse button (3), 0 = no secondary button required
-local current          = "ar"   -- Currently active weapon profile, e.g., "ar" = assault rifle
+
 local auto_click_speed = 25     -- Click speed in milliseconds (e.g., 10 = 10ms)
 
 -- ===========================
@@ -34,6 +34,7 @@ local weapons = {
 -- ===========================
 -- DO NOT MODIFY BELOW THIS LINE
 --===========================
+local current          = "ar"   -- Currently active weapon profile, e.g., "ar" = assault rifle
 local auto_clicking    = false
 function OnEvent(e, a)
 if IsKeyLockOn("capslock") and IsMouseButtonPressed(fire_key) then
