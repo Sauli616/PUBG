@@ -22,6 +22,14 @@ local weapons = {
   f2           = { v = 6, h = 0, d = 9,   b = false, c = 0 },
 }
 
+--=======================================================
+--=======================================================
+
+    -- SWITCH between two profiles
+    current = IsKeyLockOn("numlock") and "ar" or "smg12"
+
+--=======================================================
+--=======================================================
 
 -- ===========================
 -- DO NOT MODIFY BELOW THIS LINE
@@ -40,14 +48,6 @@ end
 else
 auto_clicking = false
 end
---=======================================================
---=======================================================
-
-    -- SWITCH between two profiles
-    current = IsKeyLockOn("numlock") and "ar" or "smg12"
-
---=======================================================
---=======================================================
 if IsKeyLockOn("scrolllock") and IsMouseButtonPressed(fire_key) and (secondary_key == 0 or IsMouseButtonPressed(secondary_key)) then
 local w = weapons[current]
 local i = 0
