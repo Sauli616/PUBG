@@ -1,0 +1,61 @@
+EnablePrimaryMouseButtonEvents(true)  -- true = on, false = off
+
+-- ===========================
+-- SETTINGS
+-- ===========================
+
+local fire_key         = 1      -- Left mouse button (1)
+local secondary_key    = 3      -- Middle mouse button (3), 0 = no secondary button required
+local current          = "ar"   -- Currently active weapon profile, e.g., "ar" = assault rifle
+local auto_click_speed = 25     -- Click speed in milliseconds (e.g., 10 = 10ms)
+
+-- ===========================
+-- WEAPON PROFILES -- B = Burst C = Burst count 
+-- D = delay H = horizontal V = vertical
+-- ===========================
+
+local weapons = {
+  ar           = { v = 4, h = 0, d = 9,   b = false, c = 0 },
+  dmr          = { v = 4, h = 1, d = 9,   b = true,  c = 3 },
+  smg12        = { v = 7, h = 1, d = 9,   b = false, c = 0 },
+  mp5          = { v = 4, h = 0, d = 9,   b = false, c = 0 },
+  f2           = { v = 6, h = 0, d = 9,   b = false, c = 0 },
+}
+
+
+-- ===========================
+-- DO NOT MODIFY BELOW THIS LINE
+--===========================
+local auto_clicking    = false
+function OnEvent(e, a)
+if IsKeyLockOn("capslock") and IsMouseButtonPressed(fire_key) then
+auto_clicking = true
+while auto_clicking do
+PressMouseButton(fire_key)
+Sleep(auto_click_speed)
+ReleaseMouseButton(fire_key)
+Sleep(auto_click_speed)
+if not IsKeyLockOn("capslock") then auto_clicking = false end
+end
+else
+auto_clicking = false
+end
+--=======================================================
+--=======================================================
+
+    -- SWITCH between two profiles
+    current = IsKeyLockOn("numlock") and "ar" or "smg12"
+
+--=======================================================
+--=======================================================
+if IsKeyLockOn("scrolllock") and IsMouseButtonPressed(fire_key) and (secondary_key == 0 or IsMouseButtonPressed(secondary_key)) then
+local w = weapons[current]
+local i = 0
+repeat
+if w.b and i >= w.c then break end
+MoveMouseRelative(w.h, w.v)
+Sleep(w.d)
+i = i + 1
+until not IsMouseButtonPressed(fire_key)
+end
+end
