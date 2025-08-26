@@ -16,8 +16,8 @@ end
 function Move_x(_horizontal_recoil)
     local random_factor = 0.8 + 0.4 * math.random()  -- 0.8–1.2
     growth_factor_x = growth_factor_x + 0.01  -- tiny incremental growth
-    -- add small random jitter
-    local jitter = (math.random() < 0.1) and (math.random(-1, 1)) or 0
+    -- add small random jitter including random sideways movement
+    local jitter = (math.random() < 0.2) and math.random(-1, 1) or 0  -- 20% chance
     MoveMouseRelative(math.floor(Volatility(random_factor, 1) * _horizontal_recoil + growth_factor_x) + jitter, 0)
 end
 
@@ -25,9 +25,10 @@ end
 function Move_y(_vertical_recoil)
     local random_factor = 0.8 + 0.4 * math.random()  -- 0.8–1.2
     growth_factor_y = growth_factor_y + 0.01  -- tiny incremental growth
-    -- add small random jitter
-    local jitter = (math.random() < 0.1) and (math.random(-1, 1)) or 0
-    MoveMouseRelative(0, math.floor(Volatility(random_factor, 1) * _vertical_recoil + growth_factor_y) + jitter)
+    -- add small random jitter including tiny sideways movement
+    local jitter_x = (math.random() < 0.1) and math.random(-1, 1) or 0  -- 10% chance horizontal jitter
+    local jitter_y = (math.random() < 0.1) and math.random(-1, 1) or 0  -- 10% chance vertical jitter
+    MoveMouseRelative(jitter_x, math.floor(Volatility(random_factor, 1) * _vertical_recoil + growth_factor_y) + jitter_y)
 end
 
 -- Main firing function
