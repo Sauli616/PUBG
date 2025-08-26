@@ -1,4 +1,4 @@
--- Weapon recoil settings
+-- SETTINGS
 local weapon_table = {Horizontal = 0, Vertical = 2}
 local toggle_key   = "capslock"
 local fire_key     = 1
@@ -7,33 +7,32 @@ local is_active = true
 local growth_factor_x = 0
 local growth_factor_y = 0
 
--- Function to generate random volatility
+-- Dont Touch!!
+
 function Volatility(_range, _impact)
     return _range * (1 + _impact * math.random())
 end
 
--- Move mouse horizontally with small growth and random factor
+
 function Move_x(_horizontal_recoil)
-    local random_factor = 0.8 + 0.4 * math.random()  -- 0.8–1.2
-    growth_factor_x = growth_factor_x + 0.01  -- tiny incremental growth
-    -- add small random jitter including random sideways movement
-    local jitter = (math.random() < 0.2) and math.random(-1, 1) or 0  -- 20% chance
+    local random_factor = 0.8 + 0.4 * math.random()  
+    growth_factor_x = growth_factor_x + 0.01 
+    local jitter = (math.random() < 0.2) and math.random(-1, 1) or 0  
     MoveMouseRelative(math.floor(Volatility(random_factor, 1) * _horizontal_recoil + growth_factor_x) + jitter, 0)
 end
 
--- Move mouse vertically with small growth and random factor
+
 function Move_y(_vertical_recoil)
     local random_factor = 0.8 + 0.4 * math.random()  -- 0.8–1.2
-    growth_factor_y = growth_factor_y + 0.01  -- tiny incremental growth
-    -- add small random jitter including tiny sideways movement
-    local jitter_x = (math.random() < 0.1) and math.random(-1, 1) or 0  -- 10% chance horizontal jitter
-    local jitter_y = (math.random() < 0.1) and math.random(-1, 1) or 0  -- 10% chance vertical jitter
+    growth_factor_y = growth_factor_y + 0.01  
+    local jitter_x = (math.random() < 0.1) and math.random(-1, 1) or 0  -- 10% chancs x jitter
+    local jitter_y = (math.random() < 0.1) and math.random(-1, 1) or 0  -- 10% chancs y jitter
     MoveMouseRelative(jitter_x, math.floor(Volatility(random_factor, 1) * _vertical_recoil + growth_factor_y) + jitter_y)
 end
 
--- Main firing function
+
 function Fire()
-    -- reset growth factors for each new spray
+    
     growth_factor_x, growth_factor_y = 0, 0
 
     local horizontal_recoil = weapon_table["Horizontal"]
@@ -77,10 +76,10 @@ function Fire()
             end
         end
 
-        -- Random fire delay between 6-12 ms
-        local delay = math.random(6, 12)
+        -- RANDOM DELAY
+        local delay = math.random(6, 12) -- Delay
         Sleep(delay)
-    until not (IsMouseButtonPressed(fire_key) and IsMouseButtonPressed(3))  -- requires LMB + RMB
+    until not (IsMouseButtonPressed(fire_key) and IsMouseButtonPressed(3))
 end
 
 -- Event handler
@@ -94,7 +93,7 @@ function OnEvent(event, arg)
     if IsKeyLockOn(toggle_key) then
         if not is_active then is_active = true end
         if event == "MOUSE_BUTTON_PRESSED" and arg == fire_key then
-            if IsMouseButtonPressed(3) then  -- only fire if RMB is held too
+            if IsMouseButtonPressed(3) then
                 Fire()
             end
         end
@@ -102,8 +101,6 @@ function OnEvent(event, arg)
         if is_active then is_active = false end
     end
 end
-
--- Initialize toggle state
 function Initialize()
     is_active = IsKeyLockOn(toggle_key)
 end
