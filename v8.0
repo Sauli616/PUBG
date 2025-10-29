@@ -1,0 +1,99 @@
+-- ==============================
+-- PUBG No-Recoil v8.0 FINAL (English)
+-- 1 Weapon Profile | SensSetting ONLY VERTICAL | Caps Lock 1.68x VERTICAL
+-- Random Horizontal 0.01-1px | Human Curve + Scroll Lock + ADS
+-- ==============================
+
+-- === ADJUST THESE ONLY ===
+local BASE_RECOIL_VERT = 5      -- Vertical recoil strength (e.g., M416=5, AKM=7)
+local HORIZONTAL_DRIFT = 0      -- Fixed horizontal recoil (e.g., AKM=+2)
+local BASE_DELAY = 18           -- Base delay ms (16–21 ms random)
+-- =========================
+
+local SensSetting = 1.0         -- ONLY VERTICAL RECOIL (adjust with mouse buttons 4/5)
+local MIN_SENS = 0.3
+local MAX_SENS = 3.0
+
+math.randomseed(os.time())
+
+-- ==============================
+-- HUMAN-LIKE MOVEMENT
+-- ==============================
+function HumanPull(vertical, horizontal)
+    local vLeft = math.floor(math.abs(vertical))
+    local hLeft = math.floor(math.abs(horizontal))
+    local vDone = 0
+    local hDone = 0
+
+    while vDone < vLeft or hDone < hLeft do
+        local stepV = 0
+        local stepH = 0
+        local delay = 1 + math.random(0, 3)  -- 1–4 ms
+
+        if vDone < vLeft then
+            stepV = 1 + math.random(0, 1)
+            vDone = vDone + stepV
+        end
+
+        if hDone < hLeft then
+            local dir = horizontal > 0 and -1 or 1
+            stepH = dir * (1 + math.random(0, 1))
+            hDone = hDone + 1
+        end
+
+        -- Human-like jitter
+        local jitterX = math.random(-1, 1)
+        local jitterY = math.random(-1, 1)
+
+        MoveMouseRelative(stepH + jitterX, stepV + jitterY)
+        Sleep(delay)
+
+        -- Random pause
+        if math.random() < 0.07 then
+            Sleep(math.random(10, 25))
+        end
+    end
+
+    -- Final delay: random
+    Sleep(BASE_DELAY + math.random(-2, 3))
+end
+
+-- ==============================
+-- MAIN EVENT
+-- ==============================
+function OnEvent(event, arg)
+    -- ADJUSTMENT: Mouse buttons 4 and 5 (ONLY VERTICAL RECOIL)
+    if event == "MOUSE_BUTTON_PRESSED" and arg == 4 then
+        SensSetting = math.min(SensSetting + 0.05, MAX_SENS)
+        Log("Vertical Sensitivity: " .. string.format("%.2f", SensSetting))
+    elseif event == "MOUSE_BUTTON_PRESSED" and arg == 5 then
+        SensSetting = math.max(SensSetting - 0.05, MIN_SENS)
+        Log("Vertical Sensitivity: " .. string.format("%.2f", SensSetting))
+    end
+
+    -- RECOIL CONTROL
+    if event == "MOUSE_BUTTON_PRESSED" and arg == 1 then
+        if IsKeyLockOn("scrolllock") and IsMouseButtonPressed(3) then
+            Log("Active")
+
+            while IsMouseButtonPressed(1) and IsMouseButtonPressed(3) and IsKeyLockOn("scrolllock") do
+                -- VERTICAL: SensSetting + Caps Lock 1.68x
+                local vertMult = IsKeyLockOn("capslock") and 1.68 or 1.0
+                local vert = (BASE_RECOIL_VERT + math.random(-1, 1)) * SensSetting * vertMult
+
+                -- HORIZONTAL: NO SensSetting | Fixed + 0.01-1px random
+                local randHoriz = (math.random() * 0.99 + 0.01)  -- 0.01-1.0
+                local dir = math.random() < 0.5 and -1 or 1
+                local totalHoriz = HORIZONTAL_DRIFT + (randHoriz * dir)
+
+                HumanPull(vert, totalHoriz)
+            end
+
+            Log("Deactivated")
+        end
+    end
+end
+
+function Log(msg)
+    OutputLogMessage("[v8.0] " .. msg .. "\n")
+end
