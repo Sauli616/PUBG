@@ -1,99 +1,113 @@
 -- ==============================
--- PUBG No-Recoil v8.0 FINAL (English)
--- 1 Weapon Profile | SensSetting ONLY VERTICAL | Caps Lock 1.68x VERTICAL
--- Random Horizontal 0.01-1px | Human Curve + Scroll Lock + ADS
+-- PUBG No-Recoil v8.2 ULTRA SMOOTH (FIXED FOR G HUB)
+-- S-curve + subpixel emulation + integer-only moves
 -- ==============================
+
+EnablePrimaryMouseButtonEvents(true)
 
 -- === ADJUST THESE ONLY ===
-local BASE_RECOIL_VERT = 5      -- Vertical recoil strength (e.g., M416=5, AKM=7)
-local HORIZONTAL_DRIFT = 0      -- Fixed horizontal recoil (e.g., AKM=+2)
-local BASE_DELAY = 18           -- Base delay ms (16–21 ms random)
+local BASE_RECOIL_VERT = 5
+local HORIZONTAL_DRIFT = 0
+local BASE_DELAY = 16
 -- =========================
 
-local SensSetting = 1.0         -- ONLY VERTICAL RECOIL (adjust with mouse buttons 4/5)
-local MIN_SENS = 0.3
-local MAX_SENS = 3.0
+local SensSetting = 1.0
+local MIN_SENS = 0.1
+local MAX_SENS = 12.0
 
-math.randomseed(os.time())
+function Log(msg)
+    OutputLogMessage("[v8.2 SMOOTH] " .. msg .. "\n")
+end
+
+-- Seed
+math.randomseed(GetRunningTime() % 32768)
+for i = 1, 20 do math.random() end
 
 -- ==============================
--- HUMAN-LIKE MOVEMENT
+-- SMOOTH PULL: Emulates subpixel with 2x resolution
 -- ==============================
-function HumanPull(vertical, horizontal)
-    local vLeft = math.floor(math.abs(vertical))
-    local hLeft = math.floor(math.abs(horizontal))
-    local vDone = 0
-    local hDone = 0
+function SmoothPull(totalVert, totalHoriz)
+    local vRemaining = totalVert
+    local hRemaining = totalHoriz
+    local vAccum = 0.0  -- Subpixel accumulator
+    local hAccum = 0.0
 
-    while vDone < vLeft or hDone < hLeft do
-        local stepV = 0
-        local stepH = 0
-        local delay = 1 + math.random(0, 3)  -- 1–4 ms
+    local steps = math.max(1, math.ceil(totalVert * 1.5))  -- More steps = smoother
 
-        if vDone < vLeft then
-            stepV = 1 + math.random(0, 1)
-            vDone = vDone + stepV
+    for i = 1, steps do
+        local t = i / steps
+        local curve = t * t * (3 - 2 * t)  -- S-curve
+
+        -- Vertical: Accumulate subpixel
+        local vTarget = curve * totalVert
+        local vStep = vTarget - vAccum
+        vAccum = vAccum + vStep
+
+        -- Horizontal
+        local hTarget = curve * totalHoriz
+        local hStep = hTarget - hAccum
+        hAccum = hAccum + hStep
+
+        -- Convert to integer ONLY when >= 1.0
+        local moveX = 0
+        local moveY = 0
+
+        if math.abs(vAccum) >= 1.0 then
+            moveY = vAccum > 0 and 1 or -1
+            vAccum = vAccum - moveY
         end
 
-        if hDone < hLeft then
-            local dir = horizontal > 0 and -1 or 1
-            stepH = dir * (1 + math.random(0, 1))
-            hDone = hDone + 1
+        if math.abs(hAccum) >= 1.0 then
+            moveX = hAccum > 0 and 1 or -1
+            hAccum = hAccum - moveX
         end
 
-        -- Human-like jitter
-        local jitterX = math.random(-1, 1)
-        local jitterY = math.random(-1, 1)
-
-        MoveMouseRelative(stepH + jitterX, stepV + jitterY)
-        Sleep(delay)
-
-        -- Random pause
-        if math.random() < 0.07 then
-            Sleep(math.random(10, 25))
+        -- Micro jitter (integer only)
+        if moveX == 0 and moveY == 0 then
+            if math.random() < 0.3 then
+                moveX = math.random() < 0.5 and -1 or 1
+            end
         end
+
+        if moveX ~= 0 or moveY ~= 0 then
+            MoveMouseRelative(moveX, moveY)
+        end
+
+        -- Ultra smooth delay
+        Sleep(1 + math.random(0, 1))
     end
 
-    -- Final delay: random
-    Sleep(BASE_DELAY + math.random(-2, 3))
+    Sleep(BASE_DELAY + math.random(-2, 2))
 end
 
 -- ==============================
 -- MAIN EVENT
 -- ==============================
 function OnEvent(event, arg)
-    -- ADJUSTMENT: Mouse buttons 4 and 5 (ONLY VERTICAL RECOIL)
     if event == "MOUSE_BUTTON_PRESSED" and arg == 4 then
-        SensSetting = math.min(SensSetting + 0.05, MAX_SENS)
-        Log("Vertical Sensitivity: " .. string.format("%.2f", SensSetting))
+        SensSetting = math.min(SensSetting + 0.02, MAX_SENS)
+        Log("Sens: " .. string.format("%.2f", SensSetting))
     elseif event == "MOUSE_BUTTON_PRESSED" and arg == 5 then
-        SensSetting = math.max(SensSetting - 0.05, MIN_SENS)
-        Log("Vertical Sensitivity: " .. string.format("%.2f", SensSetting))
+        SensSetting = math.max(SensSetting - 0.02, MIN_SENS)
+        Log("Sens: " .. string.format("%.2f", SensSetting))
     end
 
-    -- RECOIL CONTROL
     if event == "MOUSE_BUTTON_PRESSED" and arg == 1 then
         if IsKeyLockOn("scrolllock") and IsMouseButtonPressed(3) then
-            Log("Active")
+            Log("SMOOTH ACTIVE")
 
             while IsMouseButtonPressed(1) and IsMouseButtonPressed(3) and IsKeyLockOn("scrolllock") do
-                -- VERTICAL: SensSetting + Caps Lock 1.68x
                 local vertMult = IsKeyLockOn("capslock") and 1.68 or 1.0
-                local vert = (BASE_RECOIL_VERT + math.random(-1, 1)) * SensSetting * vertMult
+                local vertVar = (math.random() - 0.5) * 0.8
+                local vert = (BASE_RECOIL_VERT + vertVar) * SensSetting * vertMult
 
-                -- HORIZONTAL: NO SensSetting | Fixed + 0.01-1px random
-                local randHoriz = (math.random() * 0.99 + 0.01)  -- 0.01-1.0
-                local dir = math.random() < 0.5 and -1 or 1
-                local totalHoriz = HORIZONTAL_DRIFT + (randHoriz * dir)
+                local horizVar = (math.random() - 0.5) * 0.6
+                local horiz = HORIZONTAL_DRIFT + horizVar
 
-                HumanPull(vert, totalHoriz)
+                SmoothPull(vert, horiz)
             end
 
-            Log("Deactivated")
+            Log("SMOOTH DEACTIVATED")
         end
     end
-end
-
-function Log(msg)
-    OutputLogMessage("[v8.0] " .. msg .. "\n")
 end
