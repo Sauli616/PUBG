@@ -15,7 +15,7 @@ EnableRCS = true
 RecoilControlMode = "hi"            -- lo, me, hi, Custom
 RcCustomStrength = 7                -- NO LIMIT – käytä varoen!
 RequireToggle = true
-ToggleKey = "CapsLock"
+ToggleKey = "Scrolllock"
 
 Humanize = true
 RandomnessEnabled = true
