@@ -1,0 +1,28 @@
+-- =============================================
+-- PUBG RECOIL SCRIPT v3.4 (2025)
+-- Toggle: SCROLL LOCK
+-- Aktivoituu: RMB (3) + LMB (1) pohjassa
+-- Undetectable: Random sleep + offset
+-- =============================================
+
+EnablePrimaryMouseButtonEvents(true)
+
+local base_strength = 5  -- Säädä: 3-7 (M416=5, AKM=7)
+local min_sleep = 6
+local max_sleep = 12
+local random_offset = 1
+
+function OnEvent(event, arg)
+    if IsKeyLockOn("scrolllock") 
+       and IsMouseButtonPressed(3)  -- OIKEA (ADS)
+       and IsMouseButtonPressed(1)  -- VASEN (FIRE)
+       then
+        
+        repeat
+            Sleep(math.random(min_sleep, max_sleep))
+            local rand_x = math.random(-random_offset, random_offset)
+            local pull_y = base_strength + math.random(-1, 1)
+            MoveMouseRelative(rand_x, pull_y)
+        until not IsMouseButtonPressed(1) or not IsMouseButtonPressed(3)
+    end
+end
