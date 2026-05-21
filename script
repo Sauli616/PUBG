@@ -6,11 +6,11 @@ local key = "capslock"
 EnablePrimaryMouseButtonEvents(true);
 
 function OnEvent(event,arg)
-    if IsKeyLockOn(key) then        -- Nyt toimii vain jos CapsLock ON
+    if IsKeyLockOn(key) then       
         if not disable then        
-            if IsMouseButtonPressed(3) then   -- Oikea hiiri (RMB) tähtäys
+            if IsMouseButtonPressed(3) then  
                 repeat
-                    if IsMouseButtonPressed(1) then   -- Vasen hiiri (LMB) ammunta
+                    if IsMouseButtonPressed(1) then  
                         repeat
                             MoveMouseRelative(recoilX, recoilY)  
                             Sleep(2,3)
