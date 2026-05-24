@@ -1,13 +1,10 @@
 local recoilX = 0         
 local recoilY = 2
-local disable = false
-local key = "capslock"
+local key = "scrolllock"
 
 EnablePrimaryMouseButtonEvents(true);
-
 function OnEvent(event,arg)
-    if IsKeyLockOn(key) then       
-        if not disable then        
+    if IsKeyLockOn(key) then               
             if IsMouseButtonPressed(3) then  
                 repeat
                     if IsMouseButtonPressed(1) then  
@@ -20,4 +17,3 @@ function OnEvent(event,arg)
             end
         end
     end
-end
